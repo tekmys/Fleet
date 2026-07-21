@@ -1,0 +1,54 @@
+services:
+  # Backend API Web Service
+  - type: web
+    name: ai-lms-backend
+    env: node
+    rootDir: lms-backend
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: npx prisma db push --accept-data-loss && npm run prisma:seed && npm run start
+    disk:
+      name: uploads-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: UPLOADS_DIR
+        value: /data/uploads
+      - key: DATABASE_URL
+        sync: false
+        description: "Connection string for your Supabase PostgreSQL database (e.g. postgresql://...)"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN
+        sync: false
+        description: "Frontend application URL (e.g. https://ai-lms-frontend.onrender.com). Set this AFTER deploying the frontend static site."
+      - key: ANTHROPIC_API_KEY
+        sync: false
+        description: "Your Anthropic API key (optional if MOCK_AI=true)"
+      - key: MOCK_AI
+        value: "false"
+        sync: false
+        description: "Set to 'true' to bypass Claude API and use simulated AI responses"
+
+  # Frontend React Static Site
+  - type: static
+    name: ai-lms-frontend
+    env: static
+    rootDir: lms-frontend
+    buildCommand: npm install && npm run build
+    publishPath: dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        fromService:
+          type: web
+          name: ai-lms-backend
+          property: host
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

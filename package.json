@@ -1,0 +1,14 @@
+{
+  "name": "ai-lms",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI-powered Learning Management System",
+  "scripts": {
+    "setup": "node scripts/setup.js",
+    "dev": "concurrently -k -n backend,frontend -c blue.bold,green.bold \"npm run dev --prefix lms-backend\" \"npm run dev --prefix lms-frontend\"",
+    "build": "npm run build --prefix lms-backend && npm run build --prefix lms-frontend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
