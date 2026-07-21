@@ -6,17 +6,11 @@ services:
     rootDir: lms-backend
     buildCommand: npm install && npx prisma generate && npm run build
     startCommand: npx prisma db push --accept-data-loss && npm run prisma:seed && npm run start
-    disk:
-      name: uploads-data
-      mountPath: /data
-      sizeGB: 1
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 3000
-      - key: UPLOADS_DIR
-        value: /data/uploads
       - key: DATABASE_URL
         sync: false
         description: "Connection string for your Supabase PostgreSQL database (e.g. postgresql://...)"
