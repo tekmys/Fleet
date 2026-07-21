@@ -27,13 +27,13 @@ services:
       - key: CORS_ORIGIN
         sync: false
         description: "Frontend application URL (e.g. https://ai-lms-frontend.onrender.com). Set this AFTER deploying the frontend static site."
-      - key: ANTHROPIC_API_KEY
+      - key: GEMINI_API_KEY
         sync: false
-        description: "Your Anthropic API key (optional if MOCK_AI=true)"
+        description: "Your Gemini API key (optional if MOCK_AI=true)"
       - key: MOCK_AI
         value: "false"
         sync: false
-        description: "Set to 'true' to bypass Claude API and use simulated AI responses"
+        description: "Set to 'true' to bypass Gemini API and use simulated AI responses"
 
   # Frontend React Static Site
   - type: static
