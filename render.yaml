@@ -36,7 +36,7 @@ services:
         description: "Set to 'true' to bypass Gemini API and use simulated AI responses"
 
   # Frontend React Static Site
-  - type: static
+  - type: web
     name: ai-lms-frontend
     env: static
     rootDir: lms-frontend
