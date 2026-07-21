@@ -22,12 +22,18 @@ services:
       - key: CORS_ORIGIN
         sync: false
         description: "Frontend application URL (e.g. https://ai-lms-frontend.onrender.com). Set this AFTER deploying the frontend static site."
-      - key: GEMINI_API_KEY
+      - key: OPENROUTER_API_KEY
         sync: false
-        description: "Your Gemini API key (optional if MOCK_AI=true)"
+        description: "Your OpenRouter API key (optional if MOCK_AI=true)"
+      - key: OPENROUTER_MODEL
+        value: "meta-llama/llama-3-8b-instruct:free"
+        description: "The AI model to use from OpenRouter (default: meta-llama/llama-3-8b-instruct:free)"
+      - key: APIFY_API_KEY
+        sync: false
+        description: "Your Apify API key (optional, used for web plagiarism checks)"
       - key: MOCK_AI
         value: "false"
-        description: "Set to 'true' to bypass Gemini API and use simulated AI responses"
+        description: "Set to 'true' to bypass OpenRouter/Apify APIs and use simulated AI responses"
 
   # Frontend React Static Site
   - type: web

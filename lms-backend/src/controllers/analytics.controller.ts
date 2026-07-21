@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from 'express'
 import { z } from 'zod'
-import { generateTextWithGemini } from '../lib/gemini'
+import { generateTextWithOpenRouter } from '../lib/openrouter'
 import { Role } from '../types/enums'
 import { prisma } from '../lib/prisma'
 
@@ -193,7 +193,7 @@ export async function getStudentAiRiskInsight(req: Request, res: Response, next:
       }
     })
 
-    const useMock = !process.env.GEMINI_API_KEY || process.env.MOCK_AI === 'true'
+    const useMock = !process.env.OPENROUTER_API_KEY || process.env.MOCK_AI === 'true'
     if (useMock) {
       const insight = `### AI Early-Warning Insight (Local Engine)
       
@@ -221,7 +221,7 @@ ${gradesContext}
 
 Please provide an early-warning risk insight.`
 
-    const insight = await generateTextWithGemini({
+    const insight = await generateTextWithOpenRouter({
       systemPrompt,
       userPrompt,
       maxTokens: 512,

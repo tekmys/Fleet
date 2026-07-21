@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from 'express'
 import { z } from 'zod'
-import { generateTextWithGemini } from '../lib/gemini'
+import { generateTextWithOpenRouter } from '../lib/openrouter'
+import { searchWebWithApify } from '../lib/apify'
 import { Role } from '../types/enums'
 import { prisma } from '../lib/prisma'
 
@@ -70,7 +71,7 @@ export async function gradeFeedback(req: Request, res: Response, next: NextFunct
       return
     }
 
-    const useMock = !process.env.GEMINI_API_KEY || process.env.MOCK_AI === 'true'
+    const useMock = !process.env.OPENROUTER_API_KEY || process.env.MOCK_AI === 'true'
     if (useMock) {
       const text = submission.content
       const maxScore = submission.assignment.maxScore
@@ -145,7 +146,7 @@ ${submission.content}
 
 Grade this submission and return JSON only.`
 
-    const rawText = await generateTextWithGemini({
+    const rawText = await generateTextWithOpenRouter({
       systemPrompt,
       userPrompt,
       maxTokens: 1024,
@@ -201,7 +202,7 @@ export async function chat(req: Request, res: Response, next: NextFunction): Pro
       }
     }
 
-    const useMock = !process.env.GEMINI_API_KEY || process.env.MOCK_AI === 'true'
+    const useMock = !process.env.OPENROUTER_API_KEY || process.env.MOCK_AI === 'true'
     if (useMock) {
       const lowerMsg = message.toLowerCase()
       let reply = ''
@@ -404,7 +405,7 @@ Answer questions clearly and helpfully. Ground your answers in the course conten
       { role: 'user' as const, content: message },
     ]
 
-    const reply = await generateTextWithGemini({
+    const reply = await generateTextWithOpenRouter({
       systemPrompt,
       userPrompt: message,
       history,
@@ -429,7 +430,7 @@ export async function generateQuiz(req: Request, res: Response, next: NextFuncti
 
     const { text, numQuestions } = generateQuizSchema.parse(req.body)
 
-    const useMock = !process.env.GEMINI_API_KEY || process.env.MOCK_AI === 'true'
+    const useMock = !process.env.OPENROUTER_API_KEY || process.env.MOCK_AI === 'true'
     if (useMock) {
       const lowerText = text.toLowerCase()
       let topic = 'General Systems'
@@ -708,7 +709,7 @@ Rules:
 
     const userPrompt = `Generate ${numQuestions} multiple-choice questions from the following text:\n\n${text}`
 
-    const rawText = await generateTextWithGemini({
+    const rawText = await generateTextWithOpenRouter({
       systemPrompt,
       userPrompt,
       maxTokens: 4096,
@@ -743,7 +744,7 @@ export async function summarise(req: Request, res: Response, next: NextFunction)
 
     const { text } = summariseSchema.parse(req.body)
 
-    const useMock = !process.env.GEMINI_API_KEY || process.env.MOCK_AI === 'true'
+    const useMock = !process.env.OPENROUTER_API_KEY || process.env.MOCK_AI === 'true'
     if (useMock) {
       const textPreview = text.length > 60 ? text.substring(0, 60) + '...' : text
       const wordCount = text.split(/\s+/).filter(Boolean).length
@@ -770,7 +771,7 @@ This document reviews educational materials detailing: *"${textPreview}"*. Acros
       return
     }
 
-    const summary = await generateTextWithGemini({
+    const summary = await generateTextWithOpenRouter({
       systemPrompt: 'You are an expert academic summariser. Produce clear, structured summaries of educational content. Use bullet points for key ideas. Be concise but thorough.',
       userPrompt: `Please summarise the following text for use in an educational context:\n\n${text}`,
       maxTokens: 1024,
@@ -823,7 +824,7 @@ export async function plagiarismCheck(req: Request, res: Response, next: NextFun
       include: { student: { select: { id: true, name: true } } },
     })
 
-    const useMock = !process.env.GEMINI_API_KEY || process.env.MOCK_AI === 'true'
+    const useMock = !process.env.OPENROUTER_API_KEY || process.env.MOCK_AI === 'true'
     if (useMock) {
       if (pool.length === 0) {
         res.json({
@@ -908,9 +909,26 @@ export async function plagiarismCheck(req: Request, res: Response, next: NextFun
       .map((s, i) => `--- Submission ${i + 1} (${s.student.name}) ---\n${s.content}`)
       .join('\n\n')
 
-    const systemPrompt = `You are an academic integrity assistant. Your job is to detect potential plagiarism between student submissions.
+    // Web Search via Apify (Google Search Crawler)
+    let webResultsText = ''
+    try {
+      // Extract a clean excerpt from the student's submission (e.g. first 200 characters)
+      const searchQuery = target.content.substring(0, 200).replace(/[\r\n]+/g, ' ').trim()
+      if (searchQuery.length > 20) {
+        const webResults = await searchWebWithApify(searchQuery)
+        if (webResults && webResults.length > 0) {
+          webResultsText = webResults
+            .map((r, i) => `--- Internet Match ${i + 1} (Source: ${r.title} - ${r.url}) ---\n${r.snippet}`)
+            .join('\n\n')
+        }
+      }
+    } catch (apifyErr) {
+      console.error('Apify plagiarism web search failed:', apifyErr)
+    }
 
-Analyse the TARGET submission against each submission in the POOL. Look for:
+    const systemPrompt = `You are an academic integrity assistant. Your job is to detect potential plagiarism between student submissions and internet sources.
+
+Analyse the TARGET submission against each submission in the POOL and the INTERNET matches. Look for:
 - Near-identical or paraphrased passages
 - Shared unusual phrasing or sentence structures
 - Copied ideas presented in a similar order
@@ -920,22 +938,24 @@ Return ONLY valid JSON with this exact structure:
   "verdict": "<brief overall summary, 1-2 sentences>",
   "flags": [
     {
-      "studentName": "<name of pool submission author>",
+      "studentName": "<name of pool submission author, or internet source URL>",
       "similarityLevel": "high" | "medium" | "low",
       "evidence": "<specific passage or pattern that raised concern>"
     }
   ]
 }
 
-Only include a student in flags if there is meaningful similarity (low/medium/high). If no similarities are found, return an empty flags array.`
+Only include a source in flags if there is meaningful similarity (low/medium/high). If no similarities are found, return an empty flags array.`
 
     const userPrompt = `TARGET submission (${target.student.name}):
 ${target.content}
 
 POOL submissions to compare against:
-${poolText}`
+${poolText}
 
-    const rawText = await generateTextWithGemini({
+${webResultsText ? `INTERNET matches to compare against:\n${webResultsText}` : ''}`
+
+    const rawText = await generateTextWithOpenRouter({
       systemPrompt,
       userPrompt,
       maxTokens: 2048,
@@ -998,7 +1018,7 @@ export async function learningAnalytics(req: Request, res: Response, next: NextF
       return
     }
 
-    const useMock = !process.env.GEMINI_API_KEY || process.env.MOCK_AI === 'true'
+    const useMock = !process.env.OPENROUTER_API_KEY || process.env.MOCK_AI === 'true'
     if (useMock) {
       const summary = {
         overallTrend: 'The cohort generally demonstrated a solid understanding of the core concepts, with an average score reflecting strong technical grasp. Most students correctly identified the primary mechanisms required for the assignment.',
@@ -1040,7 +1060,7 @@ ${submissionsContext}
 
 Please analyze these submissions and generate the JSON report.`
 
-    const rawText = await generateTextWithGemini({
+    const rawText = await generateTextWithOpenRouter({
       systemPrompt,
       userPrompt,
       maxTokens: 2048,
@@ -1152,7 +1172,7 @@ export async function getAdaptivePathway(req: Request, res: Response, next: Next
       return percentage < 65
     })
 
-    const useMock = !process.env.GEMINI_API_KEY || process.env.MOCK_AI === 'true'
+    const useMock = !process.env.OPENROUTER_API_KEY || process.env.MOCK_AI === 'true'
     if (useMock) {
       // Dynamic High-Fidelity Mock Generator based on actual DB stats!
       let summaryText = `Hello, ${student.name}! Here is your personalized learning pathway for **${course.title}** (${course.code}). `
@@ -1304,7 +1324,7 @@ ${gradesInfo}
 
 Please build a personalized adaptive learning pathway based strictly on this profile.`
 
-    const rawText = await generateTextWithGemini({
+    const rawText = await generateTextWithOpenRouter({
       systemPrompt,
       userPrompt,
       maxTokens: 2048,
