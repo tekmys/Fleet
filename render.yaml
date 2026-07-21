@@ -3,6 +3,7 @@ services:
   - type: web
     name: ai-lms-backend
     env: node
+    plan: free
     rootDir: lms-backend
     buildCommand: npm install && npx prisma generate && npm run build
     startCommand: npx prisma db push --accept-data-loss && npm run prisma:seed && npm run start
@@ -32,6 +33,7 @@ services:
   - type: web
     name: ai-lms-frontend
     env: static
+    plan: free
     rootDir: lms-frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
