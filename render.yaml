@@ -33,7 +33,6 @@ services:
   - type: web
     name: ai-lms-frontend
     env: static
-    plan: free
     rootDir: lms-frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
