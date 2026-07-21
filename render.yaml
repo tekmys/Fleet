@@ -32,7 +32,6 @@ services:
         description: "Your Gemini API key (optional if MOCK_AI=true)"
       - key: MOCK_AI
         value: "false"
-        sync: false
         description: "Set to 'true' to bypass Gemini API and use simulated AI responses"
 
   # Frontend React Static Site
