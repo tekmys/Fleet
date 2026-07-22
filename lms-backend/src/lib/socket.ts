@@ -7,10 +7,25 @@ let io: Server | null = null
 // Maps userId -> Set of socketIds
 const userSockets = new Map<string, Set<string>>()
 
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
+  : ['http://localhost:5173', 'http://127.0.0.1:5173']
+
 export function initSocket(server: HttpServer): Server {
   io = new Server(server, {
     cors: {
-      origin: process.env.CORS_ORIGIN ?? 'http://localhost:5173',
+      origin: (origin, callback) => {
+        if (
+          !origin ||
+          allowedOrigins.includes(origin) ||
+          allowedOrigins.includes('*') ||
+          process.env.NODE_ENV === 'development'
+        ) {
+          callback(null, true)
+        } else {
+          callback(new Error('Not allowed by CORS'))
+        }
+      },
       credentials: true,
     },
   })
