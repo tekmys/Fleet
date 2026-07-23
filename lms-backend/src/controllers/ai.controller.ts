@@ -413,6 +413,7 @@ Answer questions clearly and helpfully. Ground your answers in the course conten
     })
     res.json({ success: true, data: { reply } })
   } catch (err) {
+    console.error('CHAT CONTROLLER ERROR:', err)
     next(err)
   }
 }
@@ -1150,7 +1151,7 @@ export async function getAdaptivePathway(req: Request, res: Response, next: Next
 
     const submissions = await prisma.submission.findMany({
       where: { studentId, assignment: { courseId } },
-      include: { grade: true },
+      include: { grade: true, assignment: true },
     })
 
     // Compute stats
