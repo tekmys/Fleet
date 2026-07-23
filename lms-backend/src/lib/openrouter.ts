@@ -43,7 +43,7 @@ export async function generateTextWithOpenRouter({
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${apiKey}`,
       'HTTP-Referer': 'http://localhost:3000',
-      'X-Title': 'AI LMS',
+      'X-Title': 'Fleet',
     },
     body: JSON.stringify({
       model,

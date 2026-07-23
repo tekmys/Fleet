@@ -53,9 +53,9 @@ export function LoginPage() {
         {/* Top Header */}
         <div className="flex items-center gap-3 text-white/90 relative z-10">
           <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center border border-indigo-500/30">
-            <span className="text-white text-xs font-extrabold tracking-wider">AI</span>
+            <span className="text-white text-sm font-extrabold tracking-wider">F</span>
           </div>
-          <span className="font-semibold text-sm tracking-widest text-indigo-200">AI LMS</span>
+          <span className="font-semibold text-sm tracking-widest text-indigo-200">Fleet</span>
         </div>
 
         {/* Center Welcome Crest */}
@@ -68,16 +68,16 @@ export function LoginPage() {
           </svg>
           
           <h2 className="text-4xl xl:text-5xl font-extrabold text-white tracking-tight leading-tight">
-            AI LMS Portal
+            Fleet Portal
           </h2>
           <p className="text-indigo-200/80 text-base leading-relaxed">
-            Welcome to the AI LMS Portal. Connect with your digital campus to access your interactive courses, assignments, calendars, and integrated AI tutoring assistants.
+            Welcome to the Fleet Portal. Connect with your digital campus to access your interactive courses, assignments, calendars, and integrated AI tutoring assistants.
           </p>
         </div>
 
         {/* Footer info */}
         <div className="text-xs text-indigo-300/60 relative z-10">
-          AI LMS Portal · Secure Access.
+          Fleet Portal · Secure Access.
         </div>
       </div>
 
@@ -88,7 +88,7 @@ export function LoginPage() {
           {/* Small Branding Header for Mobile */}
           <div className="flex flex-col items-center text-center lg:items-start lg:text-left space-y-2">
             <div className="lg:hidden w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center mb-2 shadow-md">
-              <span className="text-white text-sm font-bold">AI</span>
+              <span className="text-white text-sm font-bold">F</span>
             </div>
             <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Portal Sign In</h1>
             <p className="text-sm text-gray-500">Sign in with your credentials</p>

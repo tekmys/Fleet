@@ -50,7 +50,7 @@ export function StudentDashboard() {
               Welcome back, {user?.name}
             </h2>
             <p className="text-xs text-slate-400">
-              AI LMS Portal · Department of Computer Science / IT
+              Fleet Portal · Department of Computer Science / IT
             </p>
           </div>
           

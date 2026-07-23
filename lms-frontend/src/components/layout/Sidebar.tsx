@@ -119,11 +119,11 @@ export function Sidebar() {
       {/* University Brand Header */}
       <div className="flex items-center gap-3 px-3 mb-8 select-none">
         <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center border border-indigo-500/30">
-          <span className="text-white text-xs font-extrabold tracking-wider">AI</span>
+          <span className="text-white text-sm font-extrabold tracking-wider">F</span>
         </div>
         <div>
-          <h1 className="font-extrabold text-white text-base leading-none tracking-wider">AI</h1>
-          <span className="text-[9px] font-bold tracking-widest text-indigo-400 uppercase leading-none block mt-0.5">LMS</span>
+          <h1 className="font-extrabold text-white text-base leading-none tracking-wider">Fleet</h1>
+          <span className="text-[9px] font-bold tracking-widest text-indigo-400 uppercase leading-none block mt-0.5">AI PORTAL</span>
         </div>
       </div>
 
