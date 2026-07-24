@@ -26,8 +26,8 @@ services:
         sync: false
         description: "Your OpenRouter API key (optional if MOCK_AI=true)"
       - key: OPENROUTER_MODEL
-        value: "meta-llama/llama-3-8b-instruct:free"
-        description: "The AI model to use from OpenRouter (default: meta-llama/llama-3-8b-instruct:free)"
+        value: "openrouter/free"
+        description: "The AI model to use from OpenRouter (default: openrouter/free)"
       - key: APIFY_API_KEY
         sync: false
         description: "Your Apify API key (optional, used for web plagiarism checks)"

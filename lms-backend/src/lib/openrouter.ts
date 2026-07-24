@@ -19,7 +19,7 @@ export async function generateTextWithOpenRouter({
     throw new Error('OPENROUTER_API_KEY is not defined in environment variables')
   }
 
-  const model = process.env.OPENROUTER_MODEL || 'meta-llama/llama-3-8b-instruct:free'
+  const model = process.env.OPENROUTER_MODEL || 'openrouter/free'
 
   // Map history roles: model/assistant -> assistant, user -> user
   const messages: { role: 'system' | 'user' | 'assistant'; content: string }[] = []
