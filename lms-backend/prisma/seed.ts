@@ -9,6 +9,11 @@ async function main() {
   console.log('🌱 Starting database seed clean-up...')
 
   // Clean existing tables in correct dependency order
+  await prisma.discussionPost.deleteMany()
+  await prisma.discussionTopic.deleteMany()
+  await prisma.quizAttempt.deleteMany()
+  await prisma.quizQuestion.deleteMany()
+  await prisma.quiz.deleteMany()
   await prisma.resourceCompletion.deleteMany()
   await prisma.grade.deleteMany()
   await prisma.submission.deleteMany()
@@ -24,7 +29,7 @@ async function main() {
   await prisma.user.deleteMany()
 
   console.log('🗑️  Cleaned existing database records.')
-  console.log('🌱 Seeding database with full AI testing scenarios...')
+  console.log('🌱 Seeding database with comprehensive test scenario datasets...')
 
   // ─── Users ────────────────────────────────────────────────────────────────
   const hashedPassword = await bcrypt.hash('password123', SALT_ROUNDS)
@@ -78,8 +83,8 @@ async function main() {
   })
   console.log(`  ✔ Students: ${studentJohn.email}, ${studentAlice.email}, ${studentBob.email}`)
 
-  // ─── Course ───────────────────────────────────────────────────────────────
-  const course = await prisma.course.create({
+  // ─── Course 1: Introduction to Computer Science (CS101) ─────────────────────
+  const course1 = await prisma.course.create({
     data: {
       title: 'Introduction to Computer Science',
       code: 'CS101',
@@ -88,27 +93,48 @@ async function main() {
       lecturerId: lecturer.id,
     },
   })
-  console.log(`  ✔ Course:   ${course.code} — ${course.title}`)
+  console.log(`  ✔ Course 1:   ${course1.code} — ${course1.title}`)
 
-  // ─── Enrolments ────────────────────────────────────────────────────────────
+  // Enrol students in Course 1
   for (const s of [studentJohn, studentAlice, studentBob]) {
     await prisma.enrolment.create({
       data: {
         studentId: s.id,
-        courseId: course.id,
+        courseId: course1.id,
       },
     })
   }
-  console.log(`  ✔ Enrolled all 3 students in ${course.code}`)
 
-  // ─── Modules & Resources (With Rich textContent for RAG Search) ───────────
+  // ─── Course 2: Advanced Web Architectures (CS302) ──────────────────────────
+  const course2 = await prisma.course.create({
+    data: {
+      title: 'Advanced Web Architectures',
+      code: 'CS302',
+      description: 'An advanced exploration of modern client-server models, server-side rendering (SSR), high-performance caching strategies, and global system scaling.',
+      status: 'PUBLISHED',
+      lecturerId: lecturer.id,
+    },
+  })
+  console.log(`  ✔ Course 2:   ${course2.code} — ${course2.title}`)
+
+  // Enrol John and Alice in Course 2
+  for (const s of [studentJohn, studentAlice]) {
+    await prisma.enrolment.create({
+      data: {
+        studentId: s.id,
+        courseId: course2.id,
+      },
+    })
+  }
+
+  // ─── Course 1: Modules & Resources (With Rich textContent for RAG Search) ──
   
   // Week 1 Module
   const mod1 = await prisma.module.create({
     data: {
       title: 'Week 1 — Algorithms & Problem Solving',
       order: 0,
-      courseId: course.id,
+      courseId: course1.id,
     },
   })
 
@@ -150,7 +176,7 @@ async function main() {
     data: {
       title: 'Week 2 — Relational Databases & ORMs',
       order: 1,
-      courseId: course.id,
+      courseId: course1.id,
     },
   })
 
@@ -175,7 +201,7 @@ async function main() {
     data: {
       title: 'Week 3 — Web Application Security',
       order: 2,
-      courseId: course.id,
+      courseId: course1.id,
     },
   })
 
@@ -196,9 +222,31 @@ async function main() {
     },
   })
 
+  // ─── Course 2: Modules & Resources ──────────────────────────────────────────
+  const course2mod1 = await prisma.module.create({
+    data: {
+      title: 'Week 1 — React Server Components & Hydration',
+      order: 0,
+      courseId: course2.id,
+    },
+  })
+
+  const course2res1 = await prisma.resource.create({
+    data: {
+      title: 'React Server Components deep-dive',
+      type: 'LINK',
+      url: 'https://example.com/cs302-rsc-hydration',
+      moduleId: course2mod1.id,
+      textContent: `React Server Components (RSC) represent a paradigm shift in how React components are loaded and rendered.
+      Traditional React rendering (Client-Side Rendering or CSR) forces the browser to download a large JavaScript bundle, boot up the React app, execute fetches, and render DOM nodes.
+      RSCs render on the server, producing a lightweight serialized JSON metadata stream containing DOM elements. The browser reads this stream to paint pixels without downloading bundle logic for server components.
+      Hydration is the process where client-side React takes over the static HTML sent by the server, attaching event listeners and hooks to create an interactive application store.`,
+    },
+  })
+
   console.log('  ✔ Modules & Resources created with rich textContent.')
 
-  // ─── Assignments ──────────────────────────────────────────────────────────
+  // ─── Course 1: Assignments ─────────────────────────────────────────────────
   const assignment1 = await prisma.assignment.create({
     data: {
       id: 'seed-assignment-1',
@@ -206,7 +254,7 @@ async function main() {
       description: 'Write a short essay explaining what an algorithm is, details of sorting/searching algorithms, and provide three real-world examples.',
       dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 1 week from now
       maxScore: 100,
-      courseId: course.id,
+      courseId: course1.id,
     },
   })
 
@@ -217,10 +265,22 @@ async function main() {
       description: 'Design a relational database schema for an online bookstore. Describe the tables, relationships, foreign keys, and the use of indexes.',
       dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 2 weeks from now
       maxScore: 100,
-      courseId: course.id,
+      courseId: course1.id,
     },
   })
   console.log(`  ✔ Assignments: ${assignment1.title}, ${assignment2.title}`)
+
+  // ─── Course 2: Assignments ─────────────────────────────────────────────────
+  const assignment3 = await prisma.assignment.create({
+    data: {
+      id: 'seed-assignment-3',
+      title: 'Lab 1 — Build a Server Component',
+      description: 'Develop a React Server Component (RSC) that reads data directly from a relational SQLite/PostgreSQL store and displays it in a clean flexbox grid.',
+      dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
+      maxScore: 50,
+      courseId: course2.id,
+    },
+  })
 
   // ─── Submissions & Grading ─────────────────────────────────────────────────
   
@@ -292,7 +352,7 @@ async function main() {
 
   // -- HW 2 Submissions --
 
-  // John Student: High-quality submission (Ungraded - Ready for auto-grading test)
+  // John Student: High-quality submission (Ungraded)
   const subJohnHw2 = await prisma.submission.create({
     data: {
       studentId: studentJohn.id,
@@ -329,15 +389,16 @@ async function main() {
   console.log('  ✔ Submissions and grades seeded successfully.')
 
   // ─── Resource Completions (To calculate student progress) ─────────────────
-  // John has completed 3/4 resources
+  // John has completed 3/4 resources in CS101
   await prisma.resourceCompletion.create({ data: { studentId: studentJohn.id, resourceId: res1.id } })
   await prisma.resourceCompletion.create({ data: { studentId: studentJohn.id, resourceId: res2.id } })
   await prisma.resourceCompletion.create({ data: { studentId: studentJohn.id, resourceId: res3.id } })
 
-  // Alice has completed 1/4 resources
+  // Alice has completed 1/4 resources in CS101
   await prisma.resourceCompletion.create({ data: { studentId: studentAlice.id, resourceId: res1.id } })
 
-  // Bob has completed 0/4 resources
+  // John has completed 1/1 resources in CS302
+  await prisma.resourceCompletion.create({ data: { studentId: studentJohn.id, resourceId: course2res1.id } })
   console.log('  ✔ Resource completions seeded.')
 
   // ─── Announcements ──────────────────────────────────────────────────────────
@@ -345,11 +406,218 @@ async function main() {
     data: {
       title: 'Welcome to CS101!',
       content: 'Welcome to Introduction to Computer Science. Please review the course modules and get started on Week 1 materials. Homework 1 is due next week!',
-      courseId: course.id,
+      courseId: course1.id,
+      authorId: lecturer.id,
+    },
+  })
+
+  await prisma.announcement.create({
+    data: {
+      title: 'Blueprint Sync Success!',
+      content: 'Welcome to CS302. Please review the React Server Component module guidelines in your study resources!',
+      courseId: course2.id,
       authorId: lecturer.id,
     },
   })
   console.log('  ✔ Announcements seeded.')
+
+  // ─── Quizzes (MCQ Modules) ──────────────────────────────────────────────────
+  
+  // CS101 Quiz 1
+  const quiz1 = await prisma.quiz.create({
+    data: {
+      title: 'Week 1 — Algorithms Review Quiz',
+      description: 'Test your understanding of basic sorting algorithms, Dijkstra\'s algorithm, and computational complexity (Big O notation).',
+      timeLimit: 15,
+      maxAttempts: 2,
+      courseId: course1.id,
+    },
+  })
+
+  const q1q1 = await prisma.quizQuestion.create({
+    data: {
+      questionText: 'What is the worst-case time complexity of the Bubble Sort algorithm?',
+      type: 'MULTIPLE_CHOICE',
+      options: ['O(n log n)', 'O(n)', 'O(n²)', 'O(1)'],
+      correctAnswer: 'O(n²)',
+      explanation: 'Bubble Sort has a nested loop structure. In the worst-case scenario (a reverse-sorted list), it requires comparing and swapping every adjacent element pair, resulting in quadratic n² operations.',
+      quizId: quiz1.id,
+    },
+  })
+
+  const q1q2 = await prisma.quizQuestion.create({
+    data: {
+      questionText: 'Dijkstra\'s algorithm is widely used to solve which category of problems?',
+      type: 'MULTIPLE_CHOICE',
+      options: [
+        'Finding minimum spanning trees',
+        'Finding the shortest path in a weighted graph',
+        'Sorting alphabetical lists',
+        'Hashing user passwords'
+      ],
+      correctAnswer: 'Finding the shortest path in a weighted graph',
+      explanation: 'Dijkstra\'s algorithm calculates the shortest path from a starting node to all other reachable nodes in a graph with non-negative edge weights.',
+      quizId: quiz1.id,
+    },
+  })
+
+  const q1q3 = await prisma.quizQuestion.create({
+    data: {
+      questionText: 'Which property describes an algorithm that terminates after a specific number of steps?',
+      type: 'MULTIPLE_CHOICE',
+      options: ['Finiteness', 'Definiteness', 'Effectiveness', 'Concurrency'],
+      correctAnswer: 'Finiteness',
+      explanation: 'Finiteness means an algorithm must halt after executing a limited/finite number of steps, preventing infinite loops.',
+      quizId: quiz1.id,
+    },
+  })
+
+  // CS101 Quiz 2
+  const quiz2 = await prisma.quiz.create({
+    data: {
+      title: 'Week 2 — Relational Database Basics',
+      description: 'Check your understanding of primary keys, foreign keys, and indices.',
+      timeLimit: 10,
+      maxAttempts: 1,
+      courseId: course1.id,
+    },
+  })
+
+  await prisma.quizQuestion.create({
+    data: {
+      questionText: 'Which database keyword establishes a connection/relationship between two tables?',
+      type: 'MULTIPLE_CHOICE',
+      options: ['Primary Key', 'Foreign Key', 'Composite Index', 'Uniqueness Index'],
+      correctAnswer: 'Foreign Key',
+      explanation: 'A Foreign Key is a column or set of columns in one table that references the Primary Key of another table, modeling the database relationship.',
+      quizId: quiz2.id,
+    },
+  })
+
+  // CS302 Quiz 1
+  const quiz3 = await prisma.quiz.create({
+    data: {
+      title: 'RSC & Hydration Essentials',
+      description: 'Intermediate questions checking your understanding of React Server Component rendering streams and client hydration.',
+      timeLimit: 10,
+      maxAttempts: 3,
+      courseId: course2.id,
+    },
+  })
+
+  await prisma.quizQuestion.create({
+    data: {
+      questionText: 'Which of the following is true regarding React Server Components (RSC)?',
+      type: 'MULTIPLE_CHOICE',
+      options: [
+        'They run in the browser and re-render on window resize events',
+        'They execute entirely on the server and do not ship code bundles to the client',
+        'They require full client-side Redux states to fetch database tables',
+        'They bypass HTML serialization completely'
+      ],
+      correctAnswer: 'They execute entirely on the server and do not ship code bundles to the client',
+      explanation: 'RSCs render on the server to output a lightweight payload stream, removing their execution logic and dependencies from the browser JavaScript bundles.',
+      quizId: quiz3.id,
+    },
+  })
+
+  console.log('  ✔ Quizzes and questions seeded.')
+
+  // ─── Quiz Attempts ─────────────────────────────────────────────────────────
+  
+  // John's Attempt on CS101 Quiz 1 (Score: 3/3, 100%)
+  await prisma.quizAttempt.create({
+    data: {
+      studentId: studentJohn.id,
+      quizId: quiz1.id,
+      answers: {
+        [q1q1.id]: 'O(n²)',
+        [q1q2.id]: 'Finding the shortest path in a weighted graph',
+        [q1q3.id]: 'Finiteness'
+      },
+      score: 100,
+      startedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+      completedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000 + 5 * 60 * 1000), // took 5 mins
+    },
+  })
+
+  // Alice's Attempt on CS101 Quiz 1 (Score: 2/3, 66.7%)
+  await prisma.quizAttempt.create({
+    data: {
+      studentId: studentAlice.id,
+      quizId: quiz1.id,
+      answers: {
+        [q1q1.id]: 'O(n log n)', // wrong choice
+        [q1q2.id]: 'Finding the shortest path in a weighted graph',
+        [q1q3.id]: 'Finiteness'
+      },
+      score: 66.67,
+      startedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+      completedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000 + 12 * 60 * 1000), // took 12 mins
+    },
+  })
+
+  console.log('  ✔ Pre-existing quiz attempts seeded.')
+
+  // ─── Discussion Forums (Topics & Comments) ──────────────────────────────────
+  
+  // Topic 1 in CS101 (Created by John Student)
+  const topic1 = await prisma.discussionTopic.create({
+    data: {
+      title: 'Clarification on Dijkstra\'s Time Complexity',
+      content: 'Could someone clarify why Dijkstra\'s algorithm with a binary heap has a time complexity of O((V + E) log V) instead of O(V²)? I understand the adjacency list lookup but am confused about how edge relaxations affect the log V part.',
+      courseId: course1.id,
+      authorId: studentJohn.id,
+    },
+  })
+
+  // Post 1 (Jane Lecturer replies)
+  await prisma.discussionPost.create({
+    data: {
+      content: 'Great question, John! When we relax an edge (u, v), we may need to update the distance to vertex v inside our Priority Queue. In a Binary Heap, this decrease-key operation takes O(log V) time. Since we perform this operation up to E times (once for every edge) and extract the minimum vertex V times, the total complexity scales to O((V + E) log V). When graphs are dense, this is significantly faster than using an un-indexed array which performs O(V²) operations.',
+      topicId: topic1.id,
+      authorId: lecturer.id,
+    },
+  })
+
+  // Post 2 (Alice replies)
+  await prisma.discussionPost.create({
+    data: {
+      content: 'This explains it perfectly, thank you Jane! I was struggling to understand the log V term in our homework formulas.',
+      topicId: topic1.id,
+      authorId: studentAlice.id,
+    },
+  })
+
+  // Topic 2 in CS101 (Created by Jane Lecturer)
+  const topic2 = await prisma.discussionTopic.create({
+    data: {
+      title: 'SQL vs NoSQL: Choosing the Right Engine',
+      content: 'In Week 2, we covered relational SQL databases. However, many systems use non-relational Document/NoSQL stores like MongoDB. Let\'s discuss: In what scenarios would you choose SQL (PostgreSQL/SQLite) over NoSQL, and when is NoSQL preferred?',
+      courseId: course1.id,
+      authorId: lecturer.id,
+    },
+  })
+
+  // Post 1 (Bob replies)
+  await prisma.discussionPost.create({
+    data: {
+      content: 'I think SQL is best when we have complex relationships and need strict ACID transactions (like in banking systems). NoSQL is better when the data structure changes frequently and we need high write scalability without strict relational lookups.',
+      topicId: topic2.id,
+      authorId: studentBob.id,
+    },
+  })
+
+  // Post 2 (John replies)
+  await prisma.discussionPost.create({
+    data: {
+      content: 'Fully agree with Bob. Furthermore, SQLite is fantastic for offline-first or embedded clients, whereas PostgreSQL is perfect for scaling relational systems. NoSQL excels when handling unstructured logs or caching JSON objects.',
+      topicId: topic2.id,
+      authorId: studentJohn.id,
+    },
+  })
+
+  console.log('  ✔ Forum discussion boards and nested posts seeded.')
 
   console.log('\n✅ Database seed completed successfully!\n')
   console.log('  Testing Credentials (Password: "password123"):')
