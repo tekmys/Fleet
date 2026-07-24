@@ -44,10 +44,8 @@ services:
     staticPublishPath: dist
     envVars:
       - key: VITE_API_BASE_URL
-        fromService:
-          type: web
-          name: ai-lms-backend
-          property: url
+        sync: false
+        description: "The public URL of your backend service (e.g., https://ai-lms-backend-obzr.onrender.com). Set this after deploying the backend."
       - key: NPM_FLAGS
         value: "--legacy-peer-deps"
     routes:
