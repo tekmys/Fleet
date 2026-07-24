@@ -265,6 +265,12 @@ export function CourseView() {
             <Link to={`/student/courses/${id}/ai`}>
               <Button size="sm" variant="secondary" className="dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700">✦ AI Assistant</Button>
             </Link>
+            <Link to={`/student/courses/${id}/quizzes`}>
+              <Button size="sm" variant="secondary" className="dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700">Quizzes</Button>
+            </Link>
+            <Link to={`/student/courses/${id}/forum`}>
+              <Button size="sm" variant="secondary" className="dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700">Discussion Board</Button>
+            </Link>
           </div>
         </div>
 

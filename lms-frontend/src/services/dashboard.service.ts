@@ -14,6 +14,8 @@ export interface LecturerStats {
   totalStudents: number
   totalAssignments: number
   pendingSubmissions: number
+  totalSubmissions?: number
+  gradedSubmissions?: number
   recentSubmissions: {
     id: string
     submittedAt: string
@@ -27,6 +29,7 @@ export interface StudentStats {
   totalSubmitted: number
   upcomingAssignments: (Assignment & {
     submitted: boolean
+    isOverdue?: boolean
     course: { id: string; title: string; code: string }
   })[]
   recentGrades: {
@@ -36,7 +39,9 @@ export interface StudentStats {
     submission: {
       assignment: { id: string; title: string; maxScore: number; courseId: string }
     }
+    feedback?: string | null
   }[]
+  cumulativeAverage?: number | null
 }
 
 export const dashboardService = {

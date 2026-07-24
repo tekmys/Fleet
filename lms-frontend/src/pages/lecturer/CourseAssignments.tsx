@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useParams, Link, useSearchParams } from 'react-router-dom'
 import { DashboardShell } from '../../components/layout/DashboardShell'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
@@ -462,6 +462,14 @@ export function CourseAssignments() {
   const [viewing, setViewing] = useState<AssignmentWithCount | null>(null)
   const [showAiTools, setShowAiTools] = useState(false)
   const [deleteError, setDeleteError] = useState('')
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  useEffect(() => {
+    if (searchParams.get('openAiTool')) {
+      setShowAiTools(true)
+      setSearchParams({}, { replace: true })
+    }
+  }, [searchParams, setSearchParams])
 
   async function handleDelete(id: string) {
     if (!confirm('Delete this assignment? This will also delete all submissions.')) return
@@ -494,6 +502,12 @@ export function CourseAssignments() {
           </Link>
           <Link to={`/lecturer/courses/${courseId}/analytics`}>
             <Button variant="secondary" className="dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700">Analytics</Button>
+          </Link>
+          <Link to={`/lecturer/courses/${courseId}/quizzes`}>
+            <Button variant="secondary" className="dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700">Quizzes</Button>
+          </Link>
+          <Link to={`/lecturer/courses/${courseId}/forum`}>
+            <Button variant="secondary" className="dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700">Discussion Board</Button>
           </Link>
           <Button variant="secondary" className="dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700" onClick={() => setShowAiTools(true)}>✦ AI Tools</Button>
           <Button onClick={() => setShowCreate(true)}>+ New assignment</Button>

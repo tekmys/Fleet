@@ -15,6 +15,8 @@ import { notificationRouter } from './routes/notification.routes'
 import { progressRouter } from './routes/progress.routes'
 import { calendarRouter } from './routes/calendar.routes'
 import { analyticsRouter } from './routes/analytics.routes'
+import { quizRouter } from './routes/quiz.routes'
+import { forumRouter } from './routes/forum.routes'
 import { errorHandler } from './middleware/errorHandler'
 import path from 'path'
 import fs from 'fs'
@@ -76,6 +78,8 @@ app.use('/api/notifications', notificationRouter)
 app.use('/api/progress', progressRouter)
 app.use('/api/calendar', calendarRouter)
 app.use('/api/courses/:courseId/analytics', analyticsRouter)
+app.use('/api/quizzes', quizRouter)
+app.use('/api/forums', forumRouter)
 
 // Health check
 app.get('/api/health', (_req, res) => {

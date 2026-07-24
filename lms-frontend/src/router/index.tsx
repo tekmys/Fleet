@@ -16,6 +16,9 @@ import { CourseView } from '../pages/student/CourseView'
 import { Assignments } from '../pages/student/Assignments'
 import { AiAssistant } from '../pages/student/AiAssistant'
 import { AdaptivePathway } from '../pages/student/AdaptivePathway'
+import { QuizView } from '../pages/student/QuizView'
+import { QuizManager } from '../pages/lecturer/QuizManager'
+import { DiscussionForum } from '../pages/shared/DiscussionForum'
 import { Messages } from '../pages/Messages'
 import { CalendarPage } from '../pages/shared/CalendarPage'
 import { NotFound } from '../pages/NotFound'
@@ -57,6 +60,8 @@ export const router = createBrowserRouter([
       { path: '/lecturer/courses/:courseId/assignments', element: <CourseAssignments /> },
       { path: '/lecturer/courses/:courseId/gradebook', element: <Gradebook /> },
       { path: '/lecturer/courses/:courseId/analytics', element: <CourseAnalytics /> },
+      { path: '/lecturer/courses/:courseId/quizzes', element: <QuizManager /> },
+      { path: '/lecturer/courses/:courseId/forum', element: <DiscussionForum /> },
       { path: '/lecturer/messages', element: <Messages /> },
       { path: '/lecturer/calendar', element: <CalendarPage /> },
     ],
@@ -73,6 +78,8 @@ export const router = createBrowserRouter([
       { path: '/student/courses/:courseId/assignments', element: <Assignments /> },
       { path: '/student/courses/:courseId/ai', element: <AiAssistant /> },
       { path: '/student/courses/:courseId/pathway', element: <AdaptivePathway /> },
+      { path: '/student/courses/:courseId/quizzes', element: <QuizView /> },
+      { path: '/student/courses/:courseId/forum', element: <DiscussionForum /> },
       { path: '/student/messages', element: <Messages /> },
       { path: '/student/calendar', element: <CalendarPage /> },
     ],
