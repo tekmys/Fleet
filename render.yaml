@@ -47,7 +47,7 @@ services:
         fromService:
           type: web
           name: ai-lms-backend
-          property: host
+          property: url
       - key: NPM_FLAGS
         value: "--legacy-peer-deps"
     routes:
